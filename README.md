@@ -60,7 +60,6 @@ discord:
   custom-status: "Punishment Logger 3000"
   debug-logging: false # Enable for debugging
 ```
-
 ### Customizing Punishment Reasons
 
 Edit the `Punishment-Reasons` list to add or remove available punishment reasons:
@@ -113,7 +112,15 @@ mute-reason-durations:
 | `/punish help` | Show help menu | `punishmentsystem.use` |
 
 **Aliases:** `bgui`, `banguio`
+### Discord Usage
+```
+• `history <player>` - View punishment history
+• `lookup <player>` - Quick player lookup
+• `check <player>` - Check if player is online
+• `debug` - Show debug information
 
+**Example:** `history Notch`
+```
 ## Permissions
 
 ### Basic Permissions
