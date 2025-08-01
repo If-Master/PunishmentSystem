@@ -165,11 +165,11 @@ When enabled, the plugin sends rich embeds to Discord containing:
 
 For support, bug reports, or feature requests:
 - Create an issue on this repository
-- Contact the developer: Kanuunankuula [If_Master]
+- Contact the developer: Kanuunankuula [If_Master] | Discord: @If_master | https://discord.gg/ZhYuUtbRNp
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GNU General Public License V3 - see the LICENSE file for details.
 
 ## Contributing
 
