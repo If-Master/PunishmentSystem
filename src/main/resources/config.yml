@@ -1,0 +1,77 @@
+bedrock-prefix: "." # change this to bedrock tag
+Server-name: "My server" # Change this to the server name, it will be displayed in the discord notification
+
+debug:
+  active: false # Set to true to enable debug information
+
+discord:
+  bot-token: "YOUR_BOT_TOKEN_HERE"
+  channel-id: "YOUR_CHANNEL_ID_HERE"
+  bot-id: "YOUR_BOT_ID_HERE" # Backup function
+  active: false  # Set to true to enable Discord integration
+  custom-status: "Punishment Logger 3000"
+  debug-logging: false # Enable for debugging info
+
+Punishment-Reasons:
+  - "Fly Hacks"
+  - "Speed Hacks"
+  - "Speed Bridge"
+  - "No Fall Damage"
+  - "Kill Aura/Mob Aura"
+  - "Nuking"
+  - "Duping"
+  - "TP Abusing"
+  - "Xray"
+  - "Path Finding"
+  - "BOT"
+  - "Auto Bucket"
+  - "Delay Package"
+  - "Griefing"
+  - "Inappropriate Behavior"
+  - "Spam"
+  - "Advertising"
+  - "Hoppering loot"
+
+
+
+ban-reason-durations:
+  Fly_Hacks: 7d
+  Speed_Hacks: 5d
+  Speed_Bridge: 3d
+  No_Fall_Damage: 2d
+  Kill_Aura_Mob_Aura: 14d
+  Nuking: 30d
+  Duping: 21d
+  TP_Abusing: 7d
+  Xray: 14d
+  Path_Finding: 7d
+  BOT: 30d
+  Auto_Bucket: 5d
+  Delay_Package: 3d
+  Griefing: 7d
+  Inappropriate_Behavior: 3d
+  Spam: 1d
+  Advertising: 7d
+  Hoppering_loot: 3d
+
+
+mute-reason-durations:
+  Fly_Hacks: 30m
+  Speed_Hacks: 30m
+  Spam: 30m
+  Inappropriate_Behavior: 6h
+  Advertising: 1h
+  Speed_Bridge: 2h
+  No_Fall_Damage: 2h
+  Kill_Aura_Mob_Aura: 2h
+  Nuking: 2h
+  Duping: 2h
+  TP_Abusing: 2h
+  Xray: 2h
+  Path_Finding: 2h
+  BOT: 30d
+  Auto_Bucket: 2h
+  Delay_Package: 3d
+  Griefing: 1m
+  Hoppering_loot: 3h
+
