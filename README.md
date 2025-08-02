@@ -184,8 +184,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
 
-### Version 1.0.1
-- Initial release
+### Version 1.0.2
 - Basic punishment GUI functionality
 - Discord integration
 - Ban evasion detection
