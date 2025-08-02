@@ -597,7 +597,6 @@ public class PunishmentGuiPlugin extends JavaPlugin implements Listener, Command
     @Override
     public void onEnable() {
         instance = this;
-        logger = instance.getLogger();
         getServer().getPluginManager().registerEvents(this, this);
 
         // Enable other Scripts
