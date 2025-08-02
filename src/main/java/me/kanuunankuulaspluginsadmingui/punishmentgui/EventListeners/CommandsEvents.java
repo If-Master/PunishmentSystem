@@ -225,7 +225,6 @@ public class CommandsEvents implements Listener, CommandExecutor {
         });
     }
 
-    // Help menu method
     private void showHelpMenu(Player player) {
         executeWithPlayer(getInstance(), player, p -> {
             p.sendMessage(ChatColor.GOLD + "=== PunishmentSystem Help ===");
@@ -260,7 +259,6 @@ public class CommandsEvents implements Listener, CommandExecutor {
                 ChatColor.RED + "An error occurred while executing the command. Please contact an administrator.");
     }
 
-    // Utility method to validate command arguments
     public static boolean validateCommandArgs(Player player, String[] args, int minLength, String usage) {
         if (args.length < minLength) {
             sendMessageSafely(getInstance(), player, ChatColor.RED + "Usage: " + usage);
@@ -269,7 +267,6 @@ public class CommandsEvents implements Listener, CommandExecutor {
         return true;
     }
 
-    // Method to check if player has sufficient permissions with feedback
     public static boolean checkPermissionWithFeedback(Player player, String permission) {
         if (!player.hasPermission(permission)) {
             sendMessageSafely(getInstance(), player,
