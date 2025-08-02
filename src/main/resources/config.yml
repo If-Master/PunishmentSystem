@@ -4,6 +4,7 @@ Server-name: "My server" # Change this to the server name, it will be displayed 
 debug:
   active: false # Set to true to enable debug information
 
+
 discord:
   bot-token: "YOUR_BOT_TOKEN_HERE"
   channel-id: "YOUR_CHANNEL_ID_HERE"
