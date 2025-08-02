@@ -194,5 +194,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ---
 
 **Author:** Kanuunankuula [If_Master]  
-**Version:** 1.0.1  
+**Version:** 1.0.2  
 **Minecraft Version:** 1.21+
