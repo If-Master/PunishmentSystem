@@ -11,9 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin.*;
+import static org.bukkit.Bukkit.getLogger;
 import static org.bukkit.Bukkit.getServer;
 
 public class Debug {
+    public static void Debugger(String text, String version) {
+        if (!debugActive) {return;}
+
+        if (version.equals("warning")) {
+            getLogger().warning(text);
+        } else if (version.equals("logger")) {
+            getLogger().info(text);
+        }
+    }
+
     public static void debugPunishmentExecution(Player player, PunishmentGuiPlugin.BanSession session) {
         debugActive = getInstance().getConfig().getBoolean("discord.active", false);
         if (!debugActive) { return; }
