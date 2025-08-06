@@ -610,6 +610,7 @@ public class PunishmentGuiPlugin extends JavaPlugin implements Listener, Command
         Bancheckers bancheckers = new Bancheckers();
         Handler handler = new Handler();
         HistoryGui historyGui = new HistoryGui();
+        logger = getLogger();
 
         CommandsEvents commandEvents = new CommandsEvents();
         getServer().getPluginManager().registerEvents(commandEvents, this);
