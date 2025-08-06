@@ -4,7 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import me.kanuunankuulaspluginsadmingui.punishmentgui.Checkers.Bancheckers;
 import me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin;
+import me.kanuunankuulaspluginsadmingui.punishmentgui.Utils.FoliaUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -16,6 +18,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
 
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin.*;
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.Utils.FoliaUtils.*;
+import static org.bukkit.Color.RED;
 
 public class Discord {
     public static void reloadDiscordConfig() {
@@ -122,7 +126,6 @@ public class Discord {
             this.disabled = disabled;
         }
     }
-
     public static class DiscordActionRow {
         public int type = 1;
         public DiscordComponent[] components;
@@ -131,7 +134,6 @@ public class Discord {
             this.components = components;
         }
     }
-
     public static class DiscordMessageWithComponents {
         public String content;
         public PunishmentGuiPlugin.DiscordEmbed[] embeds;
@@ -143,7 +145,6 @@ public class Discord {
             this.components = components;
         }
     }
-
     public static class DiscordInteraction {
         public String id;
         public String token;
@@ -154,19 +155,16 @@ public class Discord {
         public String guild_id;
         public DiscordMessage message;
     }
-
     public static class DiscordInteractionData {
         public String custom_id;
         public int component_type;
     }
-
     public static class DiscordUser {
         public String id;
         public String username;
         public String discriminator;
         public boolean bot;
     }
-
     public static class DiscordMessage {
         public String id;
         public String channel_id;
@@ -176,7 +174,6 @@ public class Discord {
         public PunishmentGuiPlugin.DiscordEmbed[] embeds;
         public DiscordActionRow[] components;
     }
-
     public static class DiscordInteractionResponse {
         public int type;
         public DiscordInteractionCallbackData data;
@@ -186,7 +183,6 @@ public class Discord {
             this.data = data;
         }
     }
-
     public static class DiscordInteractionCallbackData {
         public String content;
         public PunishmentGuiPlugin.DiscordEmbed[] embeds;
@@ -199,7 +195,6 @@ public class Discord {
             this.components = components;
         }
     }
-
     public static class DiscordPresence {
         public int since;
         public DiscordActivity[] activities;
@@ -213,7 +208,6 @@ public class Discord {
             this.afk = false;
         }
     }
-
     public static class DiscordActivity {
         public String name;
         public int type;
@@ -225,7 +219,6 @@ public class Discord {
             this.state = state;
         }
     }
-
     public static class HistorySession {
         public String playerName;
         public String authorId;
@@ -621,38 +614,7 @@ public class Discord {
     }
 
     public static void startDiscordMessagePolling() {
-        synchronized (discordLock) {
-            if (discordPollingActive) {
-                return;
-            }
-
-            discordPollingActive = true;
-            discordPollingThread = new Thread(() -> {
-                while (discordPollingActive && !Thread.currentThread().isInterrupted()) {
-                    try {
-                        startDiscordMessagePolling();
-
-                        Thread.sleep(1000);
-
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    } catch (Exception e) {
-                        if (discordPollingActive) {
-                            getPluginLogger().warning("Error in Discord polling: " + e.getMessage());
-                            try {
-                                Thread.sleep(5000);
-                            } catch (InterruptedException ie) {
-                                Thread.currentThread().interrupt();
-                                break;
-                            }
-                        }
-                    }
-                }
-            }, "Discord-Polling-Thread");
-
-            discordPollingThread.start();
-        }
+        return;
     }
 
     public static void checkDiscordMessages() {
@@ -707,6 +669,8 @@ public class Discord {
 
                 lastDiscordMessageTime.put(messageId, timestamp);
 
+                getPluginLogger().info("Processing Discord command from " + authorId + ": " + content);
+
                 processDiscordCommand(content, authorId);
                 deleteDiscordMessage(messageId);
             }
@@ -715,7 +679,6 @@ public class Discord {
             getPluginLogger().warning("Error processing Discord messages: " + e.getMessage());
         }
     }
-
     public static void processDiscordCommand(String content, String authorId) {
         if (content == null || content.trim().isEmpty()) return;
 
@@ -729,32 +692,122 @@ public class Discord {
             return;
         }
 
-        if (parts.length < 2) {
-            sendDiscordMessage("❌ **Invalid command format!**\n\n" +
-                    "**Available commands:**\n" +
-                    "• `history <player>` - View punishment history\n" +
-                    "• `lookup <player>` - Quick player lookup\n" +
-                    "• `check <player>` - Check if player is online\n" +
-                    "• `debug` - Show debug information\n\n" +
-                    "**Example:** `history Notch`");
-            return;
-        }
-
-        String playerName = parts[1];
-
         switch (command) {
             case "history":
-                handleDiscordHistoryCommand(playerName, authorId);
-                break;
             case "lookup":
-                handleDiscordLookupCommand(playerName, authorId);
-                break;
             case "check":
-                handleDiscordCheckCommand(playerName, authorId);
+                if (parts.length < 2) {
+                    sendInvalidCommandMessage();
+                    return;
+                }
+                String playerName = parts[1];
+
+                switch (command) {
+                    case "history":
+                        handleDiscordHistoryCommand(playerName, authorId);
+                        break;
+                    case "lookup":
+                        handleDiscordLookupCommand(playerName, authorId);
+                        break;
+                    case "check":
+                        handleDiscordCheckCommand(playerName, authorId);
+                        break;
+                }
                 break;
+
+            case "tempban":
+                if (parts.length < 4) {
+                    sendDiscordMessage("❌ **Invalid tempban format!**\n\n" +
+                            "**Usage:** `tempban <player> <duration> <reason>`\n" +
+                            "**Example:** `tempban Notch 1d Griefing`");
+                    return;
+                }
+
+                String playerToBan = parts[1];
+                String duration = parts[2];
+                String reason = String.join(" ", Arrays.copyOfRange(parts, 3, parts.length));
+                handlediscordBanCommand(playerToBan, duration, reason, authorId);
+                break;
+
             default:
-                sendDiscordMessage("❌ **Unknown command:** `" + command + "`");
+                sendDiscordMessage("❌ **Unknown command:** `" + command + "`\n\n" +
+                        "**Available commands:**\n" +
+                        "• `history <player>` - View punishment history\n" +
+                        "• `lookup <player>` - Quick player lookup\n" +
+                        "• `check <player>` - Check if player is online\n" +
+                        "• `tempban <player> <duration> <reason>` - Temporarily ban a player\n" +
+                        "• `debug` - Show debug information");
                 break;
+        }
+    }
+    public static void sendInvalidCommandMessage() {
+        sendDiscordMessage("❌ **Invalid command format!**\n\n" +
+                "**Available commands:**\n" +
+                "• `history <player>` - View punishment history\n" +
+                "• `lookup <player>` - Quick player lookup\n" +
+                "• `check <player>` - Check if player is online\n" +
+                "• `tempban <player> <duration> <reason>` - Temporarily ban a player\n" +
+                "• `debug` - Show debug information\n\n" +
+                "**Examples:**\n" +
+                "• `history Notch`\n" +
+                "• `tempban Notch 1d Griefing`");
+    }
+
+    public static void handlediscordBanCommand(String playerName, String duration, String reason, String authorId) {
+        try {
+            if (playerName == null || playerName.trim().isEmpty()) {
+                sendDiscordMessage("❌ Player name cannot be empty!");
+                return;
+            }
+            playerName = playerName.trim();
+
+            if (duration == null || duration.trim().isEmpty()) {
+                sendDiscordMessage("❌ Duration is required!");
+                return;
+            }
+            duration = duration.trim();
+
+            if (!isValidDuration(duration)) {
+                sendDiscordMessage("❌ Invalid duration format! Use formats like: 1d, 2h, 30m, 1w, etc.");
+                return;
+            }
+
+            if (reason == null || reason.trim().isEmpty()) {
+                reason = "No reason provided";
+            }
+            reason = reason.trim();
+
+            if (Bancheckers.hasBanBypass(playerName)) {
+                sendDiscordMessage("❌ Cannot ban " + playerName + " - Player has ban bypass permission!");
+                return;
+            }
+
+            String banCommand = String.format("tempban %s %s %s", playerName, duration, reason);
+
+            FoliaUtils.executeConsoleCommand(getInstance(), banCommand);
+
+            PunishmentGuiPlugin.DiscordEmbed embed = new PunishmentGuiPlugin.DiscordEmbed();
+            embed.color = 0xFF0000;
+            embed.title = "🔨 Player Banned";
+            embed.timestamp = Instant.now().toString();
+
+            String serverName = getInstance().getConfig().getString("Server-name", "Server");
+            embed.footer = new PunishmentGuiPlugin.DiscordEmbed.Footer(serverName + " Punishment System");
+
+            List<PunishmentGuiPlugin.DiscordEmbed.Field> fields = new ArrayList<>();
+            fields.add(new PunishmentGuiPlugin.DiscordEmbed.Field("Player", playerName, true));
+            fields.add(new PunishmentGuiPlugin.DiscordEmbed.Field("Duration", duration, true));
+            fields.add(new PunishmentGuiPlugin.DiscordEmbed.Field("Banned by", "Discord User: " + "<@"+authorId+">", true));
+            fields.add(new PunishmentGuiPlugin.DiscordEmbed.Field("Reason", reason, false));
+
+            embed.fields = fields.toArray(new PunishmentGuiPlugin.DiscordEmbed.Field[0]);
+
+            sendDiscordEmbed(embed);
+
+        } catch (Exception e) {
+            sendDiscordMessage("❌ An error occurred while processing the ban command: " + e.getMessage());
+            getPluginLogger().warning("Error in Discord ban command: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -826,6 +879,10 @@ public class Discord {
         PunishmentGuiPlugin.DiscordEmbed embed = new PunishmentGuiPlugin.DiscordEmbed();
         embed.title = "🔍 Player Lookup: " + playerName;
         embed.color = 0x3498db;
+        embed.timestamp = Instant.now().toString();
+
+        String serverName = getInstance().getConfig().getString("Server-name", "Server");
+        embed.footer = new PunishmentGuiPlugin.DiscordEmbed.Footer(serverName + " Punishment System");
 
         List<PunishmentGuiPlugin.DiscordEmbed.Field> fields = new ArrayList<>();
 
@@ -869,6 +926,10 @@ public class Discord {
     public static PunishmentGuiPlugin.DiscordEmbed createCheckEmbed(String playerName, Player onlinePlayer) {
         PunishmentGuiPlugin.DiscordEmbed embed = new PunishmentGuiPlugin.DiscordEmbed();
         embed.title = "🔍 Player Check: " + playerName;
+        embed.timestamp = Instant.now().toString();
+
+        String serverName = getInstance().getConfig().getString("Server-name", "Server");
+        embed.footer = new PunishmentGuiPlugin.DiscordEmbed.Footer(serverName + " Punishment System");
 
         List<PunishmentGuiPlugin.DiscordEmbed.Field> fields = new ArrayList<>();
 
@@ -1052,12 +1113,8 @@ public class Discord {
 
         String serverName = getInstance().getConfig().getString("Server-name", "Server");
 
-        User requestingUser = jda.getUserById(session.authorId);
-        String requesterInfo = requestingUser != null ?
-                "Requested by " + requestingUser.getName():
-                "Requested by Unknown User";
 
-        embed.footer = new PunishmentGuiPlugin.DiscordEmbed.Footer(serverName + " • Page " + (session.page + 1) + " • " + requesterInfo);
+        embed.footer = new PunishmentGuiPlugin.DiscordEmbed.Footer(serverName + " • Page " + (session.page + 1));
 
         List<PunishmentGuiPlugin.PunishmentRecord> filteredRecords = filterRecordsByCategory(session.allRecords, session.category);
 
@@ -1088,7 +1145,8 @@ public class Discord {
                 "**Category:** " + categoryDisplay + "\n" +
                         "**Total Records:** " + filteredRecords.size() + "\n" +
                         "**Showing:** " + (startIndex + 1) + "-" + endIndex + " of " + filteredRecords.size() + "\n" +
-                        "**Page:** " + (session.page + 1) + "/" + totalPages,
+                        "**Page:** " + (session.page + 1) + "/" + totalPages + "\n"+
+                        "**Requested by:** <@" + session.authorId.toString() + ">" ,
                 false
         ));
 
@@ -1654,7 +1712,7 @@ public class Discord {
             getPluginLogger().info("Processing Discord command: " + content);
 
             deleteDiscordMessage(event.getMessageId());
-            processDiscordCommand(content, event.getAuthor().getId());
+            processDiscordCommandViaJDA(content, event.getAuthor().getId(), event.getChannel());
         }
         @Override
         public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
@@ -1680,9 +1738,322 @@ public class Discord {
                 case "debug":
                     handleJDADebugCommand(event);
                     break;
+                case "tempban":
+                    handleJDABanCommand(event);
+                    break;
                 default:
                     event.reply("❌ Unknown command").setEphemeral(true).queue();
             }
+        }
+        public static void processDiscordCommandViaJDA(String content, String authorId, net.dv8tion.jda.api.entities.channel.middleman.MessageChannel channel) {
+            if (content == null || content.trim().isEmpty()) return;
+
+            String[] parts = content.trim().split("\\s+");
+            if (parts.length < 1) return;
+
+            String command = parts[0].toLowerCase();
+
+            if (command.equals("debug")) {
+                handleJDADebugCommand(null, channel, authorId);
+                return;
+            }
+
+            switch (command) {
+                case "history":
+                case "lookup":
+                case "check":
+                    if (parts.length < 2) {
+                        channel.sendMessage("❌ **Invalid command format!**\n\n" +
+                                "**Available commands:**\n" +
+                                "• `history <player>` - View punishment history\n" +
+                                "• `lookup <player>` - Quick player lookup\n" +
+                                "• `check <player>` - Check if player is online\n" +
+                                "• `tempban <player> <duration> <reason>` - Temporarily ban a player\n" +
+                                "• `debug` - Show debug information\n\n" +
+                                "**Examples:**\n" +
+                                "• `history Notch`\n" +
+                                "• `tempban Notch 1d Griefing`").queue();
+                        return;
+                    }
+                    String playerName = parts[1];
+
+                    switch (command) {
+                        case "history":
+                            handleJDAHistoryCommandDirect(playerName, authorId, channel);
+                            break;
+                        case "lookup":
+                            handleJDALookupCommandDirect(playerName, authorId, channel);
+                            break;
+                        case "check":
+                            handleJDACheckCommandDirect(playerName, authorId, channel);
+                            break;
+                    }
+                    break;
+
+                case "tempban":
+                    if (parts.length < 4) {
+                        channel.sendMessage("❌ **Invalid tempban format!**\n\n" +
+                                "**Usage:** `tempban <player> <duration> <reason>`\n" +
+                                "**Example:** `tempban Notch 1d Griefing`").queue();
+                        return;
+                    }
+
+                    String playerToBan = parts[1];
+                    String duration = parts[2];
+                    String reason = String.join(" ", Arrays.copyOfRange(parts, 3, parts.length));
+                    handleJDABanCommandDirect(playerToBan, duration, reason, authorId, channel);
+                    break;
+
+                default:
+                    channel.sendMessage("❌ **Unknown command:** `" + command + "`\n\n" +
+                            "**Available commands:**\n" +
+                            "• `history <player>` - View punishment history\n" +
+                            "• `lookup <player>` - Quick player lookup\n" +
+                            "• `check <player>` - Check if player is online\n" +
+                            "• `tempban <player> <duration> <reason>` - Temporarily ban a player\n" +
+                            "• `debug` - Show debug information").queue();
+                    break;
+            }
+        }
+        public static void handleJDAHistoryCommandDirect(String playerName, String authorId, net.dv8tion.jda.api.entities.channel.middleman.MessageChannel channel) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    List<PunishmentGuiPlugin.PunishmentRecord> records = findPlayerRecords(playerName);
+
+                    if (records == null || records.isEmpty()) {
+                        channel.sendMessage("❌ No punishment history found for: `" + playerName + "`").queue();
+                        return;
+                    }
+
+                    String sessionId = UUID.randomUUID().toString();
+                    HistorySession session = new HistorySession(
+                            playerName,
+                            authorId,
+                            "all",
+                            records,
+                            sessionId
+                    );
+
+                    historySessions.put(sessionId, session);
+                    sessionExpiry.put(sessionId, System.currentTimeMillis() + SESSION_TIMEOUT);
+
+                    PunishmentGuiPlugin.DiscordEmbed embed = createHistoryEmbed(session);
+                    List<ActionRow> actionRows = createJDAActionRows(session);
+
+                    channel.sendMessageEmbeds(convertToJDAEmbed(embed))
+                            .setComponents(actionRows)
+                            .queue(message -> {
+                                session.messageId = message.getId();
+                                messageToSession.put(message.getId(), sessionId);
+                            });
+
+                } catch (Exception e) {
+                    getPluginLogger().warning("Error in JDA history command: " + e.getMessage());
+                    channel.sendMessage("❌ Error retrieving punishment history").queue();
+                }
+            });
+        }
+
+        public static void handleJDALookupCommandDirect(String playerName, String authorId, net.dv8tion.jda.api.entities.channel.middleman.MessageChannel channel) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    List<PunishmentGuiPlugin.PunishmentRecord> records = findPlayerRecords(playerName);
+                    String playerIP = getPlayerIP(playerName);
+
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setTitle("🔍 Player Lookup: " + playerName);
+                    embed.setColor(0x3498db);
+                    embed.setTimestamp(java.time.Instant.now());
+
+                    if (records != null && !records.isEmpty()) {
+                        long activeBans = records.stream()
+                                .filter(r -> (r.punishmentType.equals("BAN") || r.punishmentType.equals("TEMPBAN")) && r.active)
+                                .count();
+
+                        long activeMutes = records.stream()
+                                .filter(r -> r.punishmentType.equals("MUTE") && r.active)
+                                .count();
+
+                        embed.addField("Active Bans", String.valueOf(activeBans), true);
+                        embed.addField("Active Mutes", String.valueOf(activeMutes), true);
+                        embed.addField("Total Punishments", String.valueOf(records.size()), true);
+
+                        LocalDateTime weekAgo = LocalDateTime.now().minusDays(7);
+                        long recentCount = records.stream()
+                                .filter(r -> {
+                                    try {
+                                        LocalDateTime recordTime = LocalDateTime.parse(r.timestamp);
+                                        return recordTime.isAfter(weekAgo);
+                                    } catch (Exception e) {
+                                        return false;
+                                    }
+                                })
+                                .count();
+
+                        if (recentCount > 0) {
+                            embed.addField("Recent Activity (7 days)", recentCount + " punishment(s)", false);
+                        }
+                    } else {
+                        embed.addField("Punishment History", "No punishment history found", false);
+                    }
+
+                    StringBuilder banEvasionInfo = new StringBuilder();
+                    checkDiscordBanEvasion(playerName, playerIP, banEvasionInfo);
+                    if (banEvasionInfo.length() > 0) {
+                        embed.addField("Ban Evasion Check", banEvasionInfo.toString(), false);
+                    }
+                    embed.addField("Requested by", "<@" + authorId + ">", false);
+
+                    channel.sendMessageEmbeds(embed.build()).queue();
+
+                } catch (Exception e) {
+                    getPluginLogger().warning("Error in JDA lookup command: " + e.getMessage());
+                    channel.sendMessage("❌ Error looking up player " + playerName).queue();
+                }
+
+            });
+        }
+
+        public static void handleJDACheckCommandDirect(String playerName, String authorId, net.dv8tion.jda.api.entities.channel.middleman.MessageChannel channel) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    Player onlinePlayer = Bukkit.getPlayer(playerName);
+
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.setTitle("🔍 Player Check: " + playerName);
+                    embed.setTimestamp(java.time.Instant.now());
+
+                    if (onlinePlayer != null && onlinePlayer.isOnline()) {
+                        embed.setColor(0x2ecc71);
+                        embed.addField("Status", "🟢 Online", true);
+                        embed.addField("World", onlinePlayer.getWorld().getName(), true);
+                        embed.addField("Location",
+                                onlinePlayer.getLocation().getBlockX() + ", " +
+                                        onlinePlayer.getLocation().getBlockY() + ", " +
+                                        onlinePlayer.getLocation().getBlockZ(), true);
+
+                        if (onlinePlayer.hasPermission("punishmentsystem.bypass")) {
+                            embed.addField("⚠️ Permissions", "Has bypass permission", false);
+                        }
+
+                        embed.addField("Gamemode", onlinePlayer.getGameMode().toString(), true);
+                        embed.addField("Health", String.format("%.1f", onlinePlayer.getHealth()) + "/20", true);
+
+                        embed.addField("Requested by", "<@" + authorId + ">", false);
+                    } else {
+                        embed.setColor(0xe74c3c);
+                        embed.addField("Status", "🔴 Offline", true);
+
+                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerName);
+                        if (offlinePlayer.hasPlayedBefore()) {
+                            long lastPlayed = offlinePlayer.getLastPlayed();
+                            Date lastPlayedDate = new Date(lastPlayed);
+                            embed.addField("Last Seen", lastPlayedDate.toString(), false);
+
+                            long daysSince = (System.currentTimeMillis() - lastPlayed) / (1000 * 60 * 60 * 24);
+                            embed.addField("Days Since Last Seen", String.valueOf(daysSince), true);
+                        } else {
+                            embed.addField("Player Status", "❌ Never joined the server", false);
+                        }
+                        embed.addBlankField( true);
+                        embed.addField("Requested by", "<@" + authorId + ">", false);
+
+                    }
+
+                    channel.sendMessageEmbeds(embed.build()).queue();
+
+                } catch (Exception e) {
+                    getPluginLogger().warning("Error in JDA check command: " + e.getMessage());
+                    channel.sendMessage("❌ Error checking player " + playerName).queue();
+                }
+            });
+        }
+
+        public static void handleJDABanCommandDirect(String playerName, String duration, String reason, String authorId, net.dv8tion.jda.api.entities.channel.middleman.MessageChannel channel) {
+            try {
+                if (playerName == null || playerName.trim().isEmpty()) {
+                    channel.sendMessage("❌ Player name cannot be empty!").queue();
+                    return;
+                }
+                playerName = playerName.trim();
+
+                if (duration == null || duration.trim().isEmpty()) {
+                    channel.sendMessage("❌ Duration is required!").queue();
+                    return;
+                }
+                duration = duration.trim();
+
+                if (!isValidDuration(duration)) {
+                    channel.sendMessage("❌ Invalid duration format! Use formats like: 1d, 2h, 30m, 1w, etc.").queue();
+                    return;
+                }
+
+                if (reason == null || reason.trim().isEmpty()) {
+                    reason = "No reason provided";
+                }
+                reason = reason.trim();
+
+                if (Bancheckers.hasBanBypass(playerName)) {
+                    channel.sendMessage("❌ Cannot ban " + playerName + " - Player has ban bypass permission!").queue();
+                    return;
+                }
+
+                String banCommand = String.format("tempban %s %s %s", playerName, duration, reason);
+                FoliaUtils.executeConsoleCommand(getInstance(), banCommand);
+
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setColor(java.awt.Color.RED)
+                        .setTitle("🔨 Player Banned")
+                        .addField("Player", playerName, true)
+                        .addField("Duration", duration, true)
+                        .addField("Banned by", "<@" + authorId + ">", true)
+                        .addField("Reason", reason, false)
+                        .setTimestamp(java.time.Instant.now());
+
+                channel.sendMessageEmbeds(embed.build()).queue();
+
+            } catch (Exception e) {
+                channel.sendMessage("❌ An error occurred while processing the ban command: " + e.getMessage()).queue();
+                getPluginLogger().warning("Error in Discord ban command: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        public static void handleJDADebugCommand(SlashCommandInteractionEvent event, net.dv8tion.jda.api.entities.channel.middleman.MessageChannel channel, String authorId) {
+            CompletableFuture.runAsync(() -> {
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.setTitle("🔧 Discord Debug Information");
+                embed.setColor(0x9b59b6);
+
+                embed.setTimestamp(java.time.Instant.now());
+
+                embed.addField("Discord Active", discordActive ? "✅ YES" : "❌ NO", true);
+                embed.addField("JDA Status",
+                        jda != null && jda.getStatus().name().equals("CONNECTED") ? "✅ CONNECTED" : "❌ DISCONNECTED", true);
+                embed.addField("Scheduler Running",
+                        discordScheduler != null && !discordScheduler.isShutdown() ? "✅ YES" : "❌ NO", true);
+
+                embed.addField("Punishment History Size", String.valueOf(punishmentHistory.size()), true);
+                embed.addField("Active Sessions", String.valueOf(historySessions.size()), true);
+
+                if (!punishmentHistory.isEmpty()) {
+                    StringBuilder samplePlayers = new StringBuilder();
+                    punishmentHistory.keySet().stream()
+                            .limit(5)
+                            .forEach(player -> samplePlayers.append("• ").append(player).append("\n"));
+                    embed.addField("Sample Players", samplePlayers.toString(), false);
+                }
+
+                embed.addField("Usage", "Test with: `history <playername>`", false);
+
+                embed.addBlankField( true);
+                embed.addField("Requested by", "<@" + authorId + ">", false);
+
+                if (event != null) {
+                    event.getHook().sendMessageEmbeds(embed.build()).queue();
+                } else {
+                    channel.sendMessageEmbeds(embed.build()).queue();
+                }
+            });
         }
 
         @Override
@@ -1696,6 +2067,73 @@ public class Discord {
             }
 
             handleJDAButtonInteraction(event, buttonId);
+        }
+        public static void handleJDABanCommand(SlashCommandInteractionEvent event) {
+            try {
+                OptionMapping playerOption = event.getOption("player");
+            if (playerOption == null) {
+                event.reply("❌ Player name is required!").setEphemeral(true).queue();
+                return;
+            }
+            String playerName = playerOption.getAsString().trim();
+
+            if (playerName.isEmpty()) {
+                event.reply("❌ Player name cannot be empty!").setEphemeral(true).queue();
+                return;
+            }
+
+            OptionMapping durationOption = event.getOption("duration");
+            if (durationOption == null) {
+                event.reply("❌ Duration is required!").setEphemeral(true).queue();
+                return;
+            }
+            String duration = durationOption.getAsString().trim();
+
+            if (!isValidDuration(duration)) {
+                event.reply("❌ Invalid duration format! Use formats like: 1d, 2h, 30m, 1w, etc.").setEphemeral(true).queue();
+                return;
+            }
+
+            OptionMapping reasonOption = event.getOption("reason");
+            String reason = "No reason provided";
+            if (reasonOption != null && !reasonOption.getAsString().trim().isEmpty()) {
+                reason = reasonOption.getAsString().trim();
+            }
+
+            if (Bancheckers.hasBanBypass(playerName)) {
+                event.reply("❌ Cannot ban " + playerName + " - Player has ban bypass permission!").setEphemeral(true).queue();
+                return;
+            }
+
+            String discordUser = event.getUser().getAsTag();
+            String banCommand = String.format("tempban %s %s %s", playerName, duration, reason);
+
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), banCommand);
+
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setColor(java.awt.Color.RED)
+                    .setTitle("🔨 Player Banned")
+                    .addField("Player", playerName, true)
+                    .addField("Duration", duration, true)
+                    .addField("Banned by", discordUser, true)
+                    .addField("Reason", reason, false)
+                    .setTimestamp(Instant.now());
+
+            event.replyEmbeds(embed.build()).queue();
+
+            } catch (Exception e) {
+                event.reply("❌ An error occurred while processing the ban command: " + e.getMessage()).setEphemeral(true).queue();
+             e.printStackTrace();
+            }
+        }
+
+        private static boolean isValidDuration(String duration) {
+            if (duration == null || duration.isEmpty()) {
+                return false;
+            }
+
+            String pattern = "^\\d+[smhdw]$";
+            return duration.toLowerCase().matches(pattern);
         }
 
         public static void handleJDAButtonInteraction(ButtonInteractionEvent event, String buttonId) {
@@ -1989,7 +2427,6 @@ public class Discord {
                     EmbedBuilder embed = new EmbedBuilder();
                     embed.setTitle("🔍 Player Lookup: " + playerName);
                     embed.setColor(0x3498db);
-                    embed.setFooter("Requested by " + event.getUser().getAsTag(), event.getUser().getAvatarUrl());
                     embed.setTimestamp(java.time.Instant.now());
 
                     if (records != null && !records.isEmpty()) {
@@ -2039,7 +2476,6 @@ public class Discord {
                     errorEmbed.setTitle("❌ Error");
                     errorEmbed.setDescription("Error looking up player " + playerName);
                     errorEmbed.setColor(0xe74c3c);
-                    errorEmbed.setFooter("Requested by " + event.getUser().getAsTag(), event.getUser().getAvatarUrl());
                     errorEmbed.setTimestamp(java.time.Instant.now());
 
                     event.getHook().sendMessageEmbeds(errorEmbed.build()).queue();
@@ -2057,7 +2493,6 @@ public class Discord {
 
                     EmbedBuilder embed = new EmbedBuilder();
                     embed.setTitle("🔍 Player Check: " + playerName);
-                    embed.setFooter("Requested by " + event.getUser().getAsTag(), event.getUser().getAvatarUrl());
                     embed.setTimestamp(java.time.Instant.now());
 
                     if (onlinePlayer != null && onlinePlayer.isOnline()) {
@@ -2101,7 +2536,6 @@ public class Discord {
                     errorEmbed.setTitle("❌ Error");
                     errorEmbed.setDescription("Error checking player " + playerName);
                     errorEmbed.setColor(0xe74c3c);
-                    errorEmbed.setFooter("Requested by " + event.getUser().getAsTag(), event.getUser().getAvatarUrl());
                     errorEmbed.setTimestamp(java.time.Instant.now());
 
                     event.getHook().sendMessageEmbeds(errorEmbed.build()).queue();
@@ -2116,10 +2550,8 @@ public class Discord {
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.setTitle("🔧 Discord Debug Information");
                 embed.setColor(0x9b59b6);
-                embed.setFooter("Requested by " + event.getUser().getAsTag(), event.getUser().getAvatarUrl());
                 embed.setTimestamp(java.time.Instant.now());
 
-                // Plugin Status
                 embed.addField("Discord Active", discordActive ? "✅ YES" : "❌ NO", true);
                 embed.addField("JDA Status",
                         jda != null && jda.getStatus().name().equals("CONNECTED") ? "✅ CONNECTED" : "❌ DISCONNECTED", true);
