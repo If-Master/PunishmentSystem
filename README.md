@@ -184,12 +184,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
 
-### Version 1.0.2
-- Basic punishment GUI functionality
-- Discord integration
-- Ban evasion detection
-- Essentials integration
-- Folia support
+### Version 1.0.3
+- Discord Punishment sending added
 
 ---
 
