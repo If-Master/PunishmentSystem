@@ -1,6 +1,7 @@
 package me.kanuunankuulaspluginsadmingui.punishmentgui.gui;
 
 import me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin;
+import me.kanuunankuulaspluginsadmingui.punishmentgui.Utils.FoliaUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -22,9 +23,19 @@ import static me.kanuunankuulaspluginsadmingui.punishmentgui.executers.Punishmen
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.gui.Handler.*;
 
 public class Gui implements Listener {
+
+    public static void secureInventory(Inventory inventory) {
+        for (ItemStack item : inventory.getContents()) {
+            if (item != null && item.hasItemMeta()) {
+                Handler.addSecurityMetadata(item);
+            }
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
+
 
 
         String title = event.getView().getTitle();
@@ -38,6 +49,14 @@ public class Gui implements Listener {
             return;
         }
 
+        if (!Handler.validateGUIAuthenticity(event)) {
+            Player player2 = (Player) event.getWhoClicked();
+            player2.sendMessage(ChatColor.RED + "Security Warning: Invalid GUI detected!");
+            getPluginLogger().warning("Player " + player2.getName() + " attempted to interact with fake punishment GUI!");
+            event.setCancelled(true);
+            player.closeInventory();
+            return;
+        }
 
         event.setCancelled(true);
 
@@ -184,6 +203,8 @@ public class Gui implements Listener {
         cancel.setItemMeta(cancelMeta);
         gui.setItem(46, cancel);
 
+        secureInventory(gui);
+
         player.openInventory(gui);
     }
     public static void handlePlayerListPageNavigation(Player player, boolean nextPage) {
@@ -197,7 +218,6 @@ public class Gui implements Listener {
     }
 
 
-    // Punishment types
     public static void openPunishmentTypeGUI(Player player, String targetPlayer) {
         Player targetPlayerObj = Bukkit.getPlayer(targetPlayer);
         if (targetPlayerObj != null && targetPlayerObj.isOnline() && targetPlayerObj.hasPermission("punishmentsystem.bypass")) {
@@ -275,6 +295,8 @@ public class Gui implements Listener {
 
         PunishmentGuiPlugin.BanSession session = new PunishmentGuiPlugin.BanSession(targetPlayer);
         activeSessions.put(player, session);
+
+        secureInventory(gui);
 
         player.openInventory(gui);
     }
@@ -395,7 +417,6 @@ public class Gui implements Listener {
     }
 
 
-    // Punishments reasons
     public static void openReasonGUI(Player player) {
         PunishmentGuiPlugin.BanSession session = activeSessions.get(player);
         if (session == null) return;
@@ -537,6 +558,8 @@ public class Gui implements Listener {
         cancel.setItemMeta(cancelMeta);
         gui.setItem(53, cancel);
 
+        secureInventory(gui);
+
         player.openInventory(gui);
     }
     public static void handleReasonNavigation(Player player, InventoryClickEvent event) {
@@ -605,7 +628,7 @@ public class Gui implements Listener {
 
             chatInputWaiting.remove(player);
 
-            Bukkit.getScheduler().runTask(getInstance(), () -> {
+            FoliaUtils.runEntityTask(getInstance(), player, () -> {
                 player.sendMessage(ChatColor.GRAY + "Input received: " + ChatColor.WHITE + message);
 
                 switch (inputType) {
@@ -623,7 +646,6 @@ public class Gui implements Listener {
             });
         }
     }
-
 
 
     public static void cleanupPlayerPageData(Player player) {
