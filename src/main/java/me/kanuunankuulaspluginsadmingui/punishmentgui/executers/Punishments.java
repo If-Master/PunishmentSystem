@@ -1,6 +1,7 @@
 package me.kanuunankuulaspluginsadmingui.punishmentgui.executers;
 
 import me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin;
+import me.kanuunankuulaspluginsadmingui.punishmentgui.Utils.FoliaUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -84,7 +85,7 @@ public class Punishments {
 
         if (!command.isEmpty()) {
             String finalCommand = command;
-            Bukkit.getScheduler().runTask(getInstance(), () -> {
+            FoliaUtils.runGlobalTask(getInstance(), () -> {
                 try {
                     player.sendMessage(ChatColor.YELLOW + "Executing: " + finalCommand);
 
