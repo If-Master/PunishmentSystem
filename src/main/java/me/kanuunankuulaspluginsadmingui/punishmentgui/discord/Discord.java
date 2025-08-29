@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin.*;
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.Utils.FoliaUtils.*;
-import static org.bukkit.Color.RED;
 
 public class Discord {
     public static void reloadDiscordConfig() {
