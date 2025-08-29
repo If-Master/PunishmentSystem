@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 
-/* Complete Folia utility class for handling the most Folia-specific functionality  */
 public class FoliaUtils {
     private static boolean  isFolia = false;
 
