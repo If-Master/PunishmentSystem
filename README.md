@@ -89,7 +89,7 @@ mute-reason-durations:
 ```
 
 [For online config editor and full config please press this text line 
-]([url](https://sites.google.com/view/ifmasters-plugins/mc-plugins/configs/punishment-system?authuser=0))
+](https://sites.google.com/view/ifmasters-plugins/mc-plugins/configs/punishment-system?authuser=0)
 
 **Duration Format:**
 - `m` = minutes
