@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.Checkers.Bancheckers.*;
+import static me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin.builtInSystemActive;
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.Utils.Log.*;
 
 public class CommandHandler {
@@ -41,6 +42,7 @@ public class CommandHandler {
 
         return false;
     }
+
     public static boolean hasActualMutePermission(String playerName) {
         Player staffPlayer = Bukkit.getPlayer(playerName);
         if (staffPlayer == null) return false;
@@ -98,6 +100,7 @@ public class CommandHandler {
 
         return false;
     }
+
     public static boolean hasActualUnbanPermission(String playerName) {
         Player staffPlayer = Bukkit.getPlayer(playerName);
         if (staffPlayer == null) return false;
@@ -122,19 +125,12 @@ public class CommandHandler {
             return true;
         }
 
-        if (staffPlayer.isOp()) {
-            return true;
-        }
-
-        return false;
-    }
-    public static void logPermissionViolation(String playerName, String action) {
+        return staffPlayer.isOp();
     }
 
     public static void handleBanCommand(String[] args, String staffName) {
         if (args.length < 2) return;
         if (!hasActualBanPermission(staffName)) {
-            logPermissionViolation(staffName, "BAN");
             Player staffPlayer = Bukkit.getPlayer(staffName);
             if (staffPlayer != null) {
                 staffPlayer.sendMessage("§cYou don't have permission to execute ban commands!");
@@ -170,11 +166,11 @@ public class CommandHandler {
 
         logPunishment(playerName, "BAN", reason, "Permanent", staffName);
     }
+
     public static void handleUnBanCommand(String[] args, String staffName) {
         if (args.length < 2) return;
 
         if (!hasActualUnbanPermission(staffName)) {
-            logPermissionViolation(staffName, "UNBAN");
             Player staffPlayer = Bukkit.getPlayer(staffName);
             if (staffPlayer != null) {
                 staffPlayer.sendMessage("§cYou don't have permission to execute unban commands!");
@@ -198,11 +194,11 @@ public class CommandHandler {
 
         logPunishment(playerName, "UNBAN", reason, "No Duration", staffName);
     }
+
     public static void handleTempBanCommand(String[] args, String staffName) {
         if (args.length < 3) return;
 
         if (!hasActualBanPermission(staffName)) {
-            logPermissionViolation(staffName, "TEMPBAN");
             Player staffPlayer = Bukkit.getPlayer(staffName);
             if (staffPlayer != null) {
                 staffPlayer.sendMessage("§cYou don't have permission to execute tempban commands!");
@@ -230,11 +226,11 @@ public class CommandHandler {
 
         logPunishment(playerName, "TEMPBAN", reason, duration, staffName);
     }
+
     public static void handleMuteCommand(String[] args, String staffName) {
         if (args.length < 2) return;
 
         if (!hasActualMutePermission(staffName)) {
-            logPermissionViolation(staffName, "MUTE");
             Player staffPlayer = Bukkit.getPlayer(staffName);
             if (staffPlayer != null) {
                 staffPlayer.sendMessage("§cYou don't have permission to execute mute commands!");
@@ -265,13 +261,18 @@ public class CommandHandler {
 
         if (hasMuteBypass(playerName)) { return; }
 
-        logPunishment(playerName, "MUTE", reason, duration, staffName);
+        if ((builtInSystemActive) && (duration.toLowerCase().toString().equals("permanent"))) {
+            logPunishment(playerName, "MUTE", reason, duration, staffName);
+        } else if (!(duration.toLowerCase().equals("permanent"))) {
+            logPunishment(playerName, "TEMPMUTE", reason, duration, staffName);
+        }
+
     }
+
     public static void handleKickCommand(String[] args, String staffName) {
         if (args.length < 2) return;
 
         if (!hasActualKickPermission(staffName)) {
-            logPermissionViolation(staffName, "KICK");
             Player staffPlayer = Bukkit.getPlayer(staffName);
             if (staffPlayer != null) {
                 staffPlayer.sendMessage("§cYou don't have permission to execute kick commands!");
