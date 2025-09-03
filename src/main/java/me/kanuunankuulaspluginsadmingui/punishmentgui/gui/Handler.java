@@ -17,6 +17,26 @@ import static me.kanuunankuulaspluginsadmingui.punishmentgui.gui.HistoryGui.*;
 public class Handler {
     public static final String GUI_SECURITY_KEY = "§k§r§a§b§c§d§e§f§0§1§2§3§4§5§6§7§8§9§l§m§n§o§r";
     public static final String GUI_VALIDATION_LORE = "§8[PunishmentGUI-Verified]";
+    public static ItemStack addSecurityMetadata(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) {
+            return item;
+        }
+
+        ItemMeta meta = item.getItemMeta();
+        List<String> lore = meta.getLore();
+
+        if (lore == null) {
+            lore = new java.util.ArrayList<>();
+        }
+
+        if (!lore.contains(GUI_VALIDATION_LORE)) {
+            lore.add(GUI_VALIDATION_LORE);
+        }
+
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
 
     public static boolean validateGUIAuthenticity(InventoryClickEvent event) {
         String title = event.getView().getTitle();
@@ -50,27 +70,6 @@ public class Handler {
 
         return false;
     }
-    public static ItemStack addSecurityMetadata(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) {
-            return item;
-        }
-
-        ItemMeta meta = item.getItemMeta();
-        List<String> lore = meta.getLore();
-
-        if (lore == null) {
-            lore = new java.util.ArrayList<>();
-        }
-
-        if (!lore.contains(GUI_VALIDATION_LORE)) {
-            lore.add(GUI_VALIDATION_LORE);
-        }
-
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-        return item;
-    }
-
 
     public static void handlePlayerSelectionClick(Player player, InventoryClickEvent event) {
         if (!validateGUIAuthenticity(event)) {
@@ -100,7 +99,6 @@ public class Handler {
             player.sendMessage(ChatColor.RED + "This player cannot be punished - they have bypass permission!");
         }
     }
-
 
     public static void handleReasonPageNavigation(Player player, boolean nextPage) {
         int currentPage = reasonPage.getOrDefault(player, 0);
