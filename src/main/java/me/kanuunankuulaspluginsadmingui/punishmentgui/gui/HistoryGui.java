@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin.*;
+import static me.kanuunankuulaspluginsadmingui.punishmentgui.discord.Discord.findPlayerRecords;
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.gui.Gui.*;
 
 public class HistoryGui {
@@ -27,6 +28,7 @@ public class HistoryGui {
 
         openPunishmentHistoryPage(player, targetPlayer, records, currentPage, totalPages);
     }
+
     public static void openPunishmentHistoryPage(Player player, String targetPlayer, List<PunishmentGuiPlugin.PunishmentRecord> records, int currentPage, int totalPages) {
         Inventory gui = Bukkit.createInventory(null, 54,
                 ChatColor.DARK_PURPLE + "History: " + targetPlayer + " (Page " + currentPage + "/" + totalPages + ")");
@@ -87,10 +89,13 @@ public class HistoryGui {
         close.setItemMeta(closeMeta);
         gui.setItem(48, close);
 
+        secureInventory(gui);
+
         historyPages.put(player, new PunishmentGuiPlugin.HistoryPageInfo(targetPlayer, records, currentPage, totalPages));
 
         player.openInventory(gui);
     }
+
     public static void onHistoryCommand(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(ChatColor.RED + "Only players can use this command!");
@@ -103,7 +108,8 @@ public class HistoryGui {
         }
 
         String targetPlayer = args[1];
-        List<PunishmentGuiPlugin.PunishmentRecord> records = punishmentHistory.get(targetPlayer.toLowerCase());
+
+        List<PunishmentGuiPlugin.PunishmentRecord> records = findPlayerRecords(targetPlayer);
 
         if (records == null || records.isEmpty()) {
             player.sendMessage(ChatColor.YELLOW + "No punishment history found for " + targetPlayer);
@@ -112,5 +118,4 @@ public class HistoryGui {
 
         openPunishmentHistoryGUI(player, targetPlayer, records);
     }
-
 }
