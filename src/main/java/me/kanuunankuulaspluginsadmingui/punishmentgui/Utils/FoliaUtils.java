@@ -29,18 +29,6 @@ public class FoliaUtils {
         }
     }
 
-    // Detections
-
-    public static boolean IsFolia() {
-        return isFolia;
-    }
-
-    public static boolean IsPaper() {
-        return !isFolia;
-    }
-
-
-
     // Schedulers
     public static ScheduledTask runTask(Plugin plugin, Location location, Runnable task) {
         if (isFolia) {
