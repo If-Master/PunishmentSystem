@@ -12,6 +12,7 @@ import static me.kanuunankuulaspluginsadmingui.punishmentgui.discord.Discord.*;
 public class Log {
     public static void logPunishment(String playerName, String punishmentType, String reason, String duration, String staffMember) {
         try {
+
             String staffUUID = "Unknown";
             Player staffPlayer = Bukkit.getPlayer(staffMember);
             if (staffPlayer != null) {
@@ -34,7 +35,6 @@ public class Log {
             );
 
             String playerKey = playerName.toLowerCase();
-            punishmentHistory.computeIfAbsent(playerKey, k -> new ArrayList<>()).add(record);
 
             savePunishmentRecord(playerKey, record);
 
