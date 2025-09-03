@@ -23,13 +23,61 @@ import static me.kanuunankuulaspluginsadmingui.punishmentgui.executers.Punishmen
 import static me.kanuunankuulaspluginsadmingui.punishmentgui.gui.Handler.*;
 
 public class Gui implements Listener {
+    public static ItemStack createPunishmentRecordItem(PunishmentRecord record) {
+        Material material;
+        ChatColor nameColor;
 
-    public static void secureInventory(Inventory inventory) {
-        for (ItemStack item : inventory.getContents()) {
-            if (item != null && item.hasItemMeta()) {
-                Handler.addSecurityMetadata(item);
-            }
+        switch (record.punishmentType) {
+            case "BAN":
+                material = Material.BARRIER;
+                nameColor = ChatColor.DARK_RED;
+                break;
+            case "TEMPBAN":
+                material = Material.CLOCK;
+                nameColor = ChatColor.RED;
+                break;
+            case "MUTE":
+                material = Material.ORANGE_DYE;
+                nameColor = ChatColor.GOLD;
+                break;
+            case "KICK":
+                material = Material.IRON_BOOTS;
+                nameColor = ChatColor.YELLOW;
+                break;
+            case "UNBAN":
+                material = Material.LIME_DYE;
+                nameColor = ChatColor.GREEN;
+                break;
+            case "BanEvading":
+                material = Material.REDSTONE;
+                nameColor = ChatColor.DARK_RED;
+                break;
+            default:
+                material = Material.PAPER;
+                nameColor = ChatColor.WHITE;
         }
+
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        String status = record.active ? ChatColor.RED + " [ACTIVE]" : ChatColor.GRAY + " [INACTIVE]";
+        meta.setDisplayName(nameColor + record.punishmentType + status);
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.WHITE + "Date: " + ChatColor.AQUA + record.timestamp);
+        lore.add(ChatColor.WHITE + "Reason: " + ChatColor.GRAY + record.reason);
+
+        if (record.duration != null && !record.duration.isEmpty() &&
+                !record.punishmentType.equals("KICK") && !record.punishmentType.equals("UNBAN")) {
+            lore.add(ChatColor.WHITE + "Duration: " + ChatColor.GREEN + record.duration);
+        }
+
+        lore.add(ChatColor.WHITE + "Staff: " + ChatColor.LIGHT_PURPLE + record.staffMember);
+
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+
+        return item;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -76,6 +124,45 @@ public class Gui implements Listener {
             }
     }
 
+    @EventHandler
+    public static void onPlayerChat(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        String inputType = chatInputWaiting.get(player);
+
+        if (inputType != null) {
+            event.setCancelled(true);
+            String message = event.getMessage();
+
+            chatInputWaiting.remove(player);
+
+            FoliaUtils.runEntityTask(getInstance(), player, () -> {
+                player.sendMessage(ChatColor.GRAY + "Input received: " + ChatColor.WHITE + message);
+
+                switch (inputType) {
+                    case "PLAYER_NAME":
+                        openPunishmentTypeGUI(player, message);
+                        break;
+                    case "REASON":
+                        PunishmentGuiPlugin.BanSession reasonSession = activeSessions.get(player);
+                        if (reasonSession != null) {
+                            reasonSession.customReason = message;
+                            openReasonGUI(player);
+                        }
+                        break;
+                }
+            });
+        }
+    }
+
+
+    public static void secureInventory(Inventory inventory) {
+        for (ItemStack item : inventory.getContents()) {
+            if (item != null && item.hasItemMeta()) {
+                Handler.addSecurityMetadata(item);
+            }
+        }
+    }
+
     public static void handlePlayerSelectionNavigation(Player player, InventoryClickEvent event) {
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || !clicked.hasItemMeta()) return;
@@ -92,6 +179,7 @@ public class Gui implements Listener {
 
         handlePlayerSelectionClick(player, event);
     }
+
     public static void openPlayerListGUI(Player player) {
         int currentPage = playerListPage.getOrDefault(player, 0);
         int itemsPerPage = 44;
@@ -207,6 +295,7 @@ public class Gui implements Listener {
 
         player.openInventory(gui);
     }
+
     public static void handlePlayerListPageNavigation(Player player, boolean nextPage) {
         int currentPage = playerListPage.getOrDefault(player, 0);
         if (nextPage) {
@@ -216,7 +305,6 @@ public class Gui implements Listener {
         }
         openPlayerListGUI(player);
     }
-
 
     public static void openPunishmentTypeGUI(Player player, String targetPlayer) {
         Player targetPlayerObj = Bukkit.getPlayer(targetPlayer);
@@ -300,62 +388,6 @@ public class Gui implements Listener {
 
         player.openInventory(gui);
     }
-    public static ItemStack createPunishmentRecordItem(PunishmentRecord record) {
-        Material material;
-        ChatColor nameColor;
-
-        switch (record.punishmentType) {
-            case "BAN":
-                material = Material.BARRIER;
-                nameColor = ChatColor.DARK_RED;
-                break;
-            case "TEMPBAN":
-                material = Material.CLOCK;
-                nameColor = ChatColor.RED;
-                break;
-            case "MUTE":
-                material = Material.ORANGE_DYE;
-                nameColor = ChatColor.GOLD;
-                break;
-            case "KICK":
-                material = Material.IRON_BOOTS;
-                nameColor = ChatColor.YELLOW;
-                break;
-            case "UNBAN":
-                material = Material.LIME_DYE;
-                nameColor = ChatColor.GREEN;
-                break;
-            case "BanEvading":
-                material = Material.REDSTONE;
-                nameColor = ChatColor.DARK_RED;
-                break;
-            default:
-                material = Material.PAPER;
-                nameColor = ChatColor.WHITE;
-        }
-
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-
-        String status = record.active ? ChatColor.RED + " [ACTIVE]" : ChatColor.GRAY + " [INACTIVE]";
-        meta.setDisplayName(nameColor + record.punishmentType + status);
-
-        List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.WHITE + "Date: " + ChatColor.AQUA + record.timestamp);
-        lore.add(ChatColor.WHITE + "Reason: " + ChatColor.GRAY + record.reason);
-
-        if (record.duration != null && !record.duration.isEmpty() &&
-                !record.punishmentType.equals("KICK") && !record.punishmentType.equals("UNBAN")) {
-            lore.add(ChatColor.WHITE + "Duration: " + ChatColor.GREEN + record.duration);
-        }
-
-        lore.add(ChatColor.WHITE + "Staff: " + ChatColor.LIGHT_PURPLE + record.staffMember);
-
-        meta.setLore(lore);
-        item.setItemMeta(meta);
-
-        return item;
-    }
 
     public static void handlePunishmentTypeClick(Player player, InventoryClickEvent event) {
         ItemStack clicked = event.getCurrentItem();
@@ -415,7 +447,6 @@ public class Gui implements Listener {
             }
         }
     }
-
 
     public static void openReasonGUI(Player player) {
         PunishmentGuiPlugin.BanSession session = activeSessions.get(player);
@@ -562,6 +593,7 @@ public class Gui implements Listener {
 
         player.openInventory(gui);
     }
+
     public static void handleReasonNavigation(Player player, InventoryClickEvent event) {
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || !clicked.hasItemMeta()) return;
@@ -578,6 +610,7 @@ public class Gui implements Listener {
 
         handleReasonClick(player, event);
     }
+
     public static void handleReasonClick(Player player, InventoryClickEvent event) {
         ItemStack clicked = event.getCurrentItem();
         if (clicked == null || !clicked.hasItemMeta()) return;
@@ -616,39 +649,10 @@ public class Gui implements Listener {
         }
     }
 
-
-    @EventHandler
-    public static void onPlayerChat(AsyncPlayerChatEvent event) {
-        Player player = event.getPlayer();
-        String inputType = chatInputWaiting.get(player);
-
-        if (inputType != null) {
-            event.setCancelled(true);
-            String message = event.getMessage();
-
-            chatInputWaiting.remove(player);
-
-            FoliaUtils.runEntityTask(getInstance(), player, () -> {
-                player.sendMessage(ChatColor.GRAY + "Input received: " + ChatColor.WHITE + message);
-
-                switch (inputType) {
-                    case "PLAYER_NAME":
-                        openPunishmentTypeGUI(player, message);
-                        break;
-                    case "REASON":
-                        PunishmentGuiPlugin.BanSession reasonSession = activeSessions.get(player);
-                        if (reasonSession != null) {
-                            reasonSession.customReason = message;
-                            openReasonGUI(player);
-                        }
-                        break;
-                }
-            });
-        }
-    }
-
-
     public static void cleanupPlayerPageData(Player player) {
+        FoliaUtils.runAsyncLater(getInstance(), () -> {
+            validateAndUpdatePunishmentStatus();
+        }, 20L, java.util.concurrent.TimeUnit.SECONDS);
         activeSessions.remove(player);
         playerListPage.remove(player);
         reasonPage.remove(player);
