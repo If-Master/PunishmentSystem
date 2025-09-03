@@ -98,20 +98,22 @@ public class Punishments {
             });
         }
 
+        
+        // reminder for me in the future: Uncommenting this will casue the plugin to add to the punishment record twice the thing. :)
         String duration = "";
         if (session.punishmentType.equals("TEMPBAN") || session.punishmentType.equals("MUTE")) {
             duration = session.getCalculatedDuration();
-            logPunishment(session.targetPlayer, session.punishmentType, reasonString, duration, player.getName());
+//            logPunishment(session.targetPlayer, session.punishmentType, reasonString, duration, player.getName());
         } else if (session.punishmentType.equals("BAN")) {
             duration = "Permanent";
-            logPunishment(session.targetPlayer, session.punishmentType, reasonString, duration, player.getName());
+//            logPunishment(session.targetPlayer, session.punishmentType, reasonString, duration, player.getName());
         } else if (session.punishmentType.equals("KICK")) {
             duration = "No Duration";
-            logPunishment(session.targetPlayer, session.punishmentType, reasonString, duration, player.getName());
+//            logPunishment(session.targetPlayer, session.punishmentType, reasonString, duration, player.getName());
         } else if (session.punishmentType.equals("UNBAN")) {
             duration = "No Duration";
             String reasonString2 = "Unbanned; No reason required";
-            logPunishment(session.targetPlayer, session.punishmentType, reasonString2, duration, player.getName());
+//            logPunishment(session.targetPlayer, session.punishmentType, reasonString2, duration, player.getName());
         }
 
 
