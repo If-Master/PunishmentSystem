@@ -22,6 +22,7 @@ import static me.kanuunankuulaspluginsadmingui.punishmentgui.gui.HistoryGui.*;
 public class CommandsEvents implements Listener, CommandExecutor {
     @EventHandler(priority = EventPriority.MONITOR)
     public static void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        if (builtInSystemActive) return;
         String command = event.getMessage().toLowerCase();
         String[] args = command.split(" ");
 
@@ -35,31 +36,51 @@ public class CommandsEvents implements Listener, CommandExecutor {
             switch (cmd) {
                 case "/ban":
                     executeWithPlayer(getInstance(), staff, player -> {
+                        if (builtInSystemActive) return;
                         handleBanCommand(args, staffName);
                     });
                     break;
                 case "/tempban":
                     if (!isValidDuration(args[2])) {break;}
                     executeWithPlayer(getInstance(), staff, player -> {
+                        if (builtInSystemActive) return;
                         handleTempBanCommand(args, staffName);
                     });
                     break;
+                case "/tempmute":
                 case "/mute":
                     if (!isValidDuration(args[2])) {break;}
                     executeWithPlayer(getInstance(), staff, player -> {
+                        if (builtInSystemActive) return;
                         handleMuteCommand(args, staffName);
                     });
                     break;
                 case "/unban":
                 case "/pardon":
                     executeWithPlayer(getInstance(), staff, player -> {
+                        if (builtInSystemActive) return;
                         handleUnBanCommand(args, staffName);
+                    });
+                    break;
+                case "/kick":
+                    executeWithPlayer(getInstance(), staff, player -> {
+                        if (builtInSystemActive) return;
+                        handleKickCommand(args, staffName);
                     });
                     break;
 
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+    public static boolean isValidDuration(String duration) {
+        if (duration == null || duration.isEmpty()) return false;
+
+        try {
+            return duration.matches("^\\d+[mhdwy]$");
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -131,7 +152,23 @@ public class CommandsEvents implements Listener, CommandExecutor {
                         onHistoryCommand(p, args);
                     });
                     return true;
+                case "repairfiles":
+                    if (!player.hasPermission("punishmentsystem.repair")) {
+                        player.sendMessage(ChatColor.RED + "You don't have permission to use the file repair commands!");
+                        return true;
+                    }
 
+                    if (args.length < 2 ) {
+                        player.sendMessage(ChatColor.RED + "Usage: /punish repairfiles [confirm]");
+                        player.sendMessage(ChatColor.GOLD + "This will delete the corrupted file and attempt to load the backup file");
+                        return true;
+
+                    }
+
+                    if (!args[2].toString().toLowerCase().equals("confirm")) {return true; }
+
+                    recoverFromBackups();
+                    return true;
                 case "discord":
                     if (args.length < 2) {
                         player.sendMessage(ChatColor.RED + "Usage: /punish discord <test|status|debug>");
@@ -205,21 +242,6 @@ public class CommandsEvents implements Listener, CommandExecutor {
         });
         return true;
     }
-    private void checkPluginVersion(Player player) {
-        runAsync(getInstance(), () -> {
-            sendMessageSafely(getInstance(), player,
-                    ChatColor.YELLOW + "Checking for plugin updates...");
-
-            String currentVersion = getInstance().getDescription().getVersion();
-
-            runAsyncLater(getInstance(), () -> {
-                sendMessageSafely(getInstance(), player,
-                        ChatColor.GREEN + "Current version: " + ChatColor.WHITE + currentVersion);
-                sendMessageSafely(getInstance(), player,
-                        ChatColor.YELLOW + "Visit GitHub or Spigot for the latest version.");
-            }, 1, java.util.concurrent.TimeUnit.SECONDS);
-        });
-    }
 
     private void showHelpMenu(Player player) {
         executeWithPlayer(getInstance(), player, p -> {
@@ -247,6 +269,9 @@ public class CommandsEvents implements Listener, CommandExecutor {
         });
     }
 
+
+    // Unused Not sure yet if I need them later on, depends on what I want to add
+
     public static void handleCommandError(Player player, String command, Exception error) {
         getPluginLogger().severe("Command error in " + command + " by " + player.getName() + ": " + error.getMessage());
         error.printStackTrace();
@@ -271,5 +296,4 @@ public class CommandsEvents implements Listener, CommandExecutor {
         }
         return true;
     }
-
 }
