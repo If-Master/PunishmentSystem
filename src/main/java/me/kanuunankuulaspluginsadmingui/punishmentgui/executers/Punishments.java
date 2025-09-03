@@ -72,7 +72,7 @@ public class Punishments {
                     player.sendMessage("Lacking permissions for this command");
                     break;
                 }
-                command = "mute " + session.targetPlayer + " " + session.getCalculatedDuration() + " " + reasonString;
+                command = "tempmute " + session.targetPlayer + " " + session.getCalculatedDuration() + " " + reasonString;
                 break;
             case "UNBAN":
                 if (!player.hasPermission("punishmentsystem.unban")) {
@@ -81,6 +81,7 @@ public class Punishments {
                 }
                 command = "pardon " + session.targetPlayer;
                 break;
+
         }
 
         if (!command.isEmpty()) {
