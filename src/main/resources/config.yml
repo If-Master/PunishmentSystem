@@ -1,9 +1,14 @@
+DemoFeatures:
+  #Ignore this line for now, it's just here during like testing or new features
+
+BuiltinSystems:
+  EnforcementModule: false #  Creating the ban, unban, mute, kick, tempban. Meaning like if the game will make this the primary punishment system
+
 bedrock-prefix: "." # change this to bedrock tag
 Server-name: "My server" # Change this to the server name, it will be displayed in the discord notification
 
 debug:
   active: false # Set to true to enable debug information
-
 
 discord:
   bot-token: "YOUR_BOT_TOKEN_HERE"
