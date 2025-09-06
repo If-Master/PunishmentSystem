@@ -1,57 +1,147 @@
 name: PunishmentSystem
-version: 1.0.2
+version: 1.0.5
 description: Custom Ban GUI with Essentials integration
 author: Kanuunankuula [If_Master]
 main: me.kanuunankuulaspluginsadmingui.punishmentgui.PunishmentGuiPlugin
 api-version: 1.21
-depend: [Essentials]
+softdepend: [Essentials]
 folia-supported: true
 
 commands:
   punish:
-    description: Opens the Ban GUI
-    usage: /bangui
+    description: Open punishment GUI
+    usage: /<command> [player]
     permission: punishmentsystem.use
-    aliases: [bgui, banguio, punish]
+    aliases: [ bgui, banguio, punish ]
+  ban:
+    description: Permanently ban a player
+    usage: /<command> <player> [reason]
+    permission: punishmentsystem.ban
+  tempban:
+    description: Temporarily ban a player
+    usage: /<command> <player> <duration> [reason]
+    permission: punishmentsystem.tempban
+  unban:
+    description: Unban a player
+    usage: /<command> <player>
+    permission: punishmentsystem.unban
+    aliases: [pardon]
+  mute:
+    description: Permanently mute a player
+    usage: /<command> <player> [reason]
+    permission: punishmentsystem.mute
+  tempmute:
+    description: Temporarily mute a player
+    usage: /<command> <player> <duration> [reason]
+    permission: punishmentsystem.mute
+  unmute:
+    description: Unmute a player
+    usage: /<command> <player>
+    permission: punishmentsystem.unmute
+  kick:
+    description: Kick a player from the server
+    usage: /<command> <player> [reason]
+    permission: punishmentsystem.kick
+  banip:
+    description: Ban an IP address
+    usage: /<command> <player|ip> [reason]
+    permission: punishmentsystem.banip
+  ban-ip:
+    description: Ban an IP address
+    usage: /<command> <player|ip> [reason]
+    permission: punishmentsystem.banip
+  unbanip:
+    description: Unban an IP address
+    usage: /<command> <player|ip>
+    permission: punishmentsystem.unbanip
+    aliases: [pardon-ip]
+  banlist:
+    description: View the list of banned players
+    usage: /<command>
+    permission: punishmentsystem.banlist
+  mutelist:
+    description: View the list of muted players
+    usage: /<command>
+    permission: punishmentsystem.mutelist
 
 permissions:
-  punishmentsystem.warnbypass:
-    description: Just a way of removing the warning from a member
-    default: op
-  punishmentsystem.use:
-    description: Allows use of the Ban GUI
-    default: op
-  punishmentsystem.ban:
-    description: Allows bans with the usage of the Ban GUI
-    default: op
-  punishmentsystem.unban:
-    description: Allows unbans with the usage of the Ban GUI
-    default: op
-
-  punishmentsystem.kick:
-    description: Allows kicks with the usage of the Ban GUI
-    default: op
-  punishmentsystem.tempban:
-    description: Allows tempbans with the usage of the Ban GUI
-    default: op
-  punishmentsystem.mute:
-    description: Allows mutes with the usage of the Ban GUI
-    default: op
-
   punishmentsystem.history:
     description: Allows use of the history command
     default: op
+
+  punishmentsystem.*:
+    description: All punishment system permissions
+    children:
+      punishmentsystem.use: true
+      punishmentsystem.ban: true
+      punishmentsystem.tempban: true
+      punishmentsystem.unban: true
+      punishmentsystem.mute: true
+      punishmentsystem.unmute: true
+      punishmentsystem.kick: true
+      punishmentsystem.banip: true
+      punishmentsystem.unbanip: true
+      punishmentsystem.banlist: true
+      punishmentsystem.mutelist: true
+      punishmentsystem.bypass: true
+      punishmentsystem.warn: true
+      punishmentsystem.warnbypass: true
+      punishmentsystem.reload: true
+      punishmentsystem.debug: true
+      punishmentsystem.admin: true
+
+  punishmentsystem.use:
+    description: Access to punishment GUI
+    default: op
+  punishmentsystem.ban:
+    description: Ban players permanently
+    default: op
+  punishmentsystem.repair:
+    description: Repair damaged files with the command
+    default: op
+
+  punishmentsystem.tempban:
+    description: Ban players temporarily
+    default: op
+  punishmentsystem.unban:
+    description: Unban players
+    default: op
+  punishmentsystem.mute:
+    description: Mute players
+    default: op
+  punishmentsystem.unmute:
+    description: Unmute players
+    default: op
+  punishmentsystem.kick:
+    description: Kick players
+    default: op
+  punishmentsystem.banip:
+    description: Ban IP addresses
+    default: op
+  punishmentsystem.unbanip:
+    description: Unban IP addresses
+    default: op
+  punishmentsystem.banlist:
+    description: View ban list
+    default: op
+  punishmentsystem.mutelist:
+    description: View mute list
+    default: op
+  punishmentsystem.bypass:
+    description: Bypass all punishments
+    default: false
   punishmentsystem.warn:
-    description: Sends out a warning to all active moderators
+    description: Receive ban evasion warnings
     default: op
-
-  punishmentsystem.debug:
-    description: Allows the usage of debug
-    default: op
-
+  punishmentsystem.warnbypass:
+    description: Bypass ban evasion detection
+    default: false
   punishmentsystem.reload:
-    description: Allows the usage of the reload function
-    defualt: op
+    description: Reload plugin configuration
+    default: op
+  punishmentsystem.debug:
+    description: Access debug commands
+    default: op
 
   punishmentsystem.admin:
     description: Full Ban GUI permissions
@@ -68,3 +158,4 @@ permissions:
       punishmentsystem.ban: true
       punishmentsystem.unban: true
       punishmentsystem.mute: true
+      punishmentsystem.repair: true
