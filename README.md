@@ -142,6 +142,105 @@ mute-reason-durations:
 - `punishmentsystem.warn` - Receive ban evasion alerts
 - `punishmentsystem.warnbypass` - Bypass ban evasion detection
 
+Detailed permissions
+```
+  punishmentsystem.history:
+    description: Allows use of the history command
+    default: op
+
+  punishmentsystem.*:
+    description: All punishment system permissions
+    children:
+      punishmentsystem.use: true
+      punishmentsystem.ban: true
+      punishmentsystem.tempban: true
+      punishmentsystem.unban: true
+      punishmentsystem.mute: true
+      punishmentsystem.unmute: true
+      punishmentsystem.kick: true
+      punishmentsystem.banip: true
+      punishmentsystem.unbanip: true
+      punishmentsystem.banlist: true
+      punishmentsystem.mutelist: true
+      punishmentsystem.bypass: true
+      punishmentsystem.warn: true
+      punishmentsystem.warnbypass: true
+      punishmentsystem.reload: true
+      punishmentsystem.debug: true
+      punishmentsystem.admin: true
+
+  punishmentsystem.use:
+    description: Access to punishment GUI
+    default: op
+  punishmentsystem.ban:
+    description: Ban players permanently
+    default: op
+  punishmentsystem.repair:
+    description: Repair damaged files with the command
+    default: op
+
+  punishmentsystem.tempban:
+    description: Ban players temporarily
+    default: op
+  punishmentsystem.unban:
+    description: Unban players
+    default: op
+  punishmentsystem.mute:
+    description: Mute players
+    default: op
+  punishmentsystem.unmute:
+    description: Unmute players
+    default: op
+  punishmentsystem.kick:
+    description: Kick players
+    default: op
+  punishmentsystem.banip:
+    description: Ban IP addresses
+    default: op
+  punishmentsystem.unbanip:
+    description: Unban IP addresses
+    default: op
+  punishmentsystem.banlist:
+    description: View ban list
+    default: op
+  punishmentsystem.mutelist:
+    description: View mute list
+    default: op
+  punishmentsystem.bypass:
+    description: Bypass all punishments
+    default: false
+  punishmentsystem.warn:
+    description: Receive ban evasion warnings
+    default: op
+  punishmentsystem.warnbypass:
+    description: Bypass ban evasion detection
+    default: false
+  punishmentsystem.reload:
+    description: Reload plugin configuration
+    default: op
+  punishmentsystem.debug:
+    description: Access debug commands
+    default: op
+
+  punishmentsystem.admin:
+    description: Full Ban GUI permissions
+    default: op
+    children:
+      punishmentsystem.reload: true
+      punishmentsystem.use: true
+      punishmentsystem.warn: true
+      punishmentsystem.debug: true
+      punishmentsystem.history: true
+      punishmentsystem.warnbypass: true
+      punishmentsystem.kick: true
+      punishmentsystem.tempban: true
+      punishmentsystem.ban: true
+      punishmentsystem.unban: true
+      punishmentsystem.mute: true
+      punishmentsystem.repair: true
+
+```
+
 ## Features in Detail
 
 ### Ban Evasion Detection
@@ -187,11 +286,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
 
-### Version 1.0.3
-- Discord Punishment sending added
+### Version 1.0.5
+- Public release
+- Some fixes
+
 
 ---
 
 **Author:** Kanuunankuula [If_Master]  
-**Version:** 1.0.2  
+**Version:** 1.0.5  
 **Minecraft Version:** 1.21+
